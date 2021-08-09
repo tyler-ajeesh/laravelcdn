@@ -51,6 +51,7 @@ class AwsS3Provider extends Provider implements ProviderInterface
                     'endpoint' => null,
                     'buckets' => null,
                     'upload_folder' => '',
+                    'search_replace_folder' => '',
                     'http' => null,
                     'acl' => 'public-read',
                     'cloudfront' => [
@@ -141,7 +142,8 @@ class AwsS3Provider extends Provider implements ProviderInterface
             'cloudfront' => $this->default['providers']['aws']['s3']['cloudfront']['use'],
             'cloudfront_url' => $this->default['providers']['aws']['s3']['cloudfront']['cdn_url'],
             'http' => $this->default['providers']['aws']['s3']['http'],
-            'upload_folder' => $this->default['providers']['aws']['s3']['upload_folder']
+            'upload_folder' => $this->default['providers']['aws']['s3']['upload_folder'],
+            'search_replace_folder' => $this->default['providers']['aws']['s3']['search_replace_folder']
         ];
 
         // check if any required configuration is missed
@@ -179,12 +181,22 @@ class AwsS3Provider extends Provider implements ProviderInterface
             foreach ($assets as $file) {
                 try {
                     $this->console->writeln('<fg=cyan>'.'Uploading file path: '.$file->getRealpath().'</fg=cyan>');
+                    if(is_array($this->supplier['search_replace_folder'])){
+
+                        $fileKey=$this->supplier['upload_folder'] . str_replace('\\', '/', str_replace(
+                                $this->supplier['search_replace_folder']['search'],
+                                $this->supplier['search_replace_folder']['replace'],
+                                $file->getPathName()
+                            ));
+                    }else{
+                        $fileKey=$this->supplier['upload_folder'] . str_replace('\\', '/', $file->getPathName());
+                    }
                     $command = $this->s3_client->getCommand('putObject', [
 
                         // the bucket name
                         'Bucket' => $this->getBucket(),
                         // the path of the file on the server (CDN)
-                        'Key' => $this->supplier['upload_folder'] . str_replace('\\', '/', $file->getPathName()),
+                        'Key' => $this->supplier['upload_folder'] . str_replace('\\', '/', $fileKey),
                         // the path of the path locally
                         'Body' => fopen($file->getRealPath(), 'r'),
                         // the permission of the file
@@ -256,11 +268,23 @@ class AwsS3Provider extends Provider implements ProviderInterface
     {
         $filesOnAWS = new Collection([]);
 
-        $files = $this->s3_client->listObjects([
-            'Bucket' => $this->getBucket(),
-        ]);
+        $params = ['Bucket' => $this->getBucket()];
+        do {
+            $files = $this->s3_client->listObjectsV2($params);
+            $params['ContinuationToken'] = $files->get('NextContinuationToken');
 
-        if (!$files['Contents']) {
+            foreach ($files->get('Contents') as $file) {
+                $a = [
+                    'Key' => $file['Key'],
+                    "LastModified" => $file['LastModified']->getTimestamp(),
+                    'Size' => intval($file['Size'])
+                ];
+                $filesOnAWS->put($file['Key'], $a);
+            }
+        } while ($files->get('IsTruncated'));
+
+
+        if ($filesOnAWS->isEmpty()) {
             //no files on bucket. lets upload everything found.
             return $assets;
         }
@@ -275,10 +299,21 @@ class AwsS3Provider extends Provider implements ProviderInterface
         }
 
         $assets->transform(function ($item, $key) use (&$filesOnAWS) {
-            $fileOnAWS = $filesOnAWS->get(str_replace('\\', '/', $item->getPathName()));
+            if(is_array($this->supplier['search_replace_folder'])){
+                $fileKey=$this->supplier['upload_folder'] . str_replace('\\', '/', str_replace(
+                        $this->supplier['search_replace_folder']['search'],
+                        $this->supplier['search_replace_folder']['replace'],
+                        $item->getPathName()
+                    ));
+            }else{
+                $fileKey=$this->supplier['upload_folder'] . str_replace('\\', '/', $item->getPathName());
+            }
+            $fileOnAWS = $filesOnAWS->get(str_replace('\\', '/', $fileKey));
+            if(!$fileOnAWS)
+                return $item;
 
             //select to upload files that are different in size AND last modified time.
-            if (!($item->getMTime() === $fileOnAWS['LastModified']) && !($item->getSize() === $fileOnAWS['Size'])) {
+            if (!($item->getMTime() === $fileOnAWS['LastModified']) && !($item->getSize() === (int)$fileOnAWS['Size'])) {
                 return $item;
             }
         });
