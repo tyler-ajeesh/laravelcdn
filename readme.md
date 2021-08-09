@@ -1,10 +1,10 @@
 # Laravel CDN Assets Manager
 
-[![Latest Stable Version](https://poser.pugx.org/publiux/laravelcdn/v/stable)](https://packagist.org/packages/publiux/laravelcdn)
-[![Total Downloads](https://poser.pugx.org/publiux/laravelcdn/downloads)](https://packagist.org/packages/publiux/laravelcdn)
-[![Build Status](https://travis-ci.org/publiux/laravelcdn.svg)](https://travis-ci.org/publiux/laravelcdn)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/publiux/laravelcdn/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/publiux/laravelcdn/?branch=master)
-[![License](https://poser.pugx.org/publiux/laravelcdn/license)](https://packagist.org/packages/publiux/laravelcdn)
+[![Latest Stable Version](https://poser.pugx.org/tyler-ajeesh/laravelcdn/v/stable)](https://packagist.org/packages/tyler-ajeesh/laravelcdn)
+[![Total Downloads](https://poser.pugx.org/tyler-ajeesh/laravelcdn/downloads)](https://packagist.org/packages/tyler-ajeesh/laravelcdn)
+[![Build Status](https://travis-ci.org/tyler-ajeesh/laravelcdn.svg)](https://travis-ci.org/tyler-ajeesh/laravelcdn)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/tyler-ajeesh/laravelcdn/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/tyler-ajeesh/laravelcdn/?branch=master)
+[![License](https://poser.pugx.org/tyler-ajeesh/laravelcdn/license)](https://packagist.org/packages/tyler-ajeesh/laravelcdn)
 
 
 ##### Content Delivery Network Package for Laravel
