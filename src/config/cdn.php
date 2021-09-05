@@ -94,7 +94,7 @@ return [
                 | https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
                 |
                 */
-                'region' => '',
+                'region' => 'us-east-1',
 
                 /*
                 |--------------------------------------------------------------------------
@@ -128,7 +128,7 @@ return [
                 */
                 'buckets'       => [
 
-                    'bucket-name' => '*',
+                env('CDN_BUCKET') => '*',
                     // examples:
                     //   'your-js-bucket-name-here'   =>  ['public/js'],
                     //   'your-css-bucket-name-here'  =>  ['public/css'],
@@ -200,7 +200,7 @@ return [
                 | Add expiry data to file
                 |
                 */
-                'expires' => gmdate('D, d M Y H:i:s T', strtotime('+5 years')),
+                'expires' => gmdate('D, d M Y H:i:s T', strtotime('+10 years')),
 
                 /*
                 |--------------------------------------------------------------------------
@@ -248,7 +248,7 @@ return [
     'exclude'   => [
         'directories' => [],
         'files'       => [],
-        'extensions'  => [],
+        'extensions'  => ['php'],
         'patterns'    => [],
         'hidden'      => true,
     ],
