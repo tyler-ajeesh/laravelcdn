@@ -165,7 +165,7 @@ return [
                 | bucket-owner-read, bucket-owner-full-control, log-delivery-write
                 |
                 */
-                'acl' => 'public-read',
+                'acl' => 'private',
 
                 /*
                 |--------------------------------------------------------------------------
